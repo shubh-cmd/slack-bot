@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from django.conf import settings
 import subprocess
 import requests
-from slack_server.settings import BOT_ID, CLIENT, SLACK_TOKEN
+from slack_server.settings import BOT_ID, CLIENT, SLACK_TOKEN, WEBHOOK_URL
 EVENT_ID = None
 # Create your views here.
 class SlackView(APIView):
@@ -32,5 +32,5 @@ class SlackView(APIView):
                     file_data = r.content   
                     with open('./app/'+file_name , 'w+b') as f:
                       f.write(bytearray(file_data))
-                    subprocess.run(['bash','./app/bot.sh'])
+                    subprocess.run(['bash','./app/bot.sh', WEBHOOK_URL])
             return Response(status=200)
