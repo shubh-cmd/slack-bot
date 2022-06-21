@@ -10,12 +10,19 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+from http import client
 from pathlib import Path
 import os
 import environ
 import django_heroku
 env = environ.Env()
 environ.Env.read_env()
+from slack_sdk import *
+
+SLACK_TOKEN = env('SLACK_TOKEN')
+CLIENT = WebClient(token=SLACK_TOKEN)
+BOT_ID = CLIENT.api_call("auth.test")['user_id']
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 
 BASE_DIR = Path(__file__).resolve().parent.parent
