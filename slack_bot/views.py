@@ -24,7 +24,7 @@ class SlackView(APIView):
                     r = requests.get(file_url, headers={'Authorization': f'Bearer {SLACK_TOKEN}'})
                     r.raise_for_status()
                     file_data = r.content   
-                    with open('./app/'+file_name , 'w+b') as f:
+                    with open('./slack_bot/'+file_name , 'w+b') as f:
                       f.write(bytearray(file_data))
                     subprocess.run(['bash','./slack_bot/bot.sh', WEBHOOK_URL])
             return Response(status=200,headers={"X-Slack-No-Retry": 1})
