@@ -5,7 +5,7 @@ import requests
 from slack_server.settings import BOT_ID, CLIENT, SLACK_TOKEN, WEBHOOK_URL
 
 # Create your views here.
-class SlackBotView(APIView):
+class SlackView(APIView):
     
     def post(self,request):
         
@@ -26,5 +26,5 @@ class SlackBotView(APIView):
                     file_data = r.content   
                     with open('./app/'+file_name , 'w+b') as f:
                       f.write(bytearray(file_data))
-                    subprocess.run(['bash','./app/bot.sh', WEBHOOK_URL])
+                    subprocess.run(['bash','./slack_bot/bot.sh', WEBHOOK_URL])
             return Response(status=200,headers={"X-Slack-No-Retry": 1})
