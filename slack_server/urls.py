@@ -17,9 +17,9 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from slack_bot.views import SlackView
+from slack_bot.views import SlackStartAnalysis, SlackView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('slack/events/',SlackView.as_view())
+    path('slack/events/',SlackView.as_view()),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
