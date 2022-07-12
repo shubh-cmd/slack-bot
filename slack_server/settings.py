@@ -37,7 +37,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if env('ENVIRONMENT') == 'DEV' else False
 
-ALLOWED_HOSTS = ['daphne.herokuapp.com']
+ALLOWED_HOSTS = ['daphne.herokuapp.com', '20.219.109.231']
 
 
 # Application definition
