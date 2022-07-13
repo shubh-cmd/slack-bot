@@ -1,5 +1,5 @@
 #!/bin/bash
-
+export TERM=xterm
 # $1 -> SLACK_TOKEN
 # $2 -> current_user
 # $3 -> SLACK_CHANNEL
