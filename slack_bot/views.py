@@ -2,10 +2,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 import subprocess
 import requests
-from slack_server.settings import BOT_ID, CLIENT, SLACK_TOKEN, WEBHOOK_URL
+from slack_server.settings import BOT_ID, CLIENT, SLACK_TOKEN, SLACK_CHANNEL, BOT_BASE_DIR, UAG_BASE_DIR
 import json
+import os
+import shutil
+from queue import Queue
 # Create your views here.
-
+jobs = Queue()
+IS_FREE = True
 
 class SlackView(APIView):
 
@@ -27,14 +31,36 @@ class SlackView(APIView):
                                      'Authorization': f'Bearer {SLACK_TOKEN}'})
                     r.raise_for_status()
                     file_data = r.content
-                    with open('./slack_bot/'+file_name, 'w+b') as f:
+                    with safe_open(f'{BOT_BASE_DIR}/'+e['user_id']+'/'+file_name) as f:
                         f.write(bytearray(file_data))
                     CLIENT.chat_postEphemeral(
                         channel=e['channel_id'], user=e['user_id'], text="React any file you shared, by marking completed tick to start analysis")
             elif e['type'] == 'reaction_added' and e['user'] != BOT_ID:
-                subprocess.run(['bash', './slack_bot/bot.sh', SLACK_TOKEN])
+                global jobs
+                jobs.put(e['user'])
+                global IS_FREE
+                while jobs.qsize() and IS_FREE:
+                    current_user = jobs.get()
+                    IS_FREE = False
+                    subprocess.run(['bash', f'{BOT_BASE_DIR}/bot.sh', SLACK_TOKEN, current_user, SLACK_CHANNEL, BOT_BASE_DIR, UAG_BASE_DIR])
+                
+                    result = CLIENT.files_upload(file=f'{BOT_BASE_DIR}/{current_user}/analysis-logs.zip',initial_comment="Result of the Analysis",channels=SLACK_CHANNEL)
+                    file_download_url = result['file']['url_private_download']
+                    CLIENT.chat_postEphemeral(channel=SLACK_CHANNEL,user=current_user,text=f'Find analysis report at {file_download_url}')
+                    shutil.rmtree(f'{BOT_BASE_DIR}/{current_user}',onerror=handler)
+                    IS_FREE = True
+
 
             return Response(status=200, headers={"X-Slack-No-Retry": 1})
 
 
 
+def safe_open(path):
+    ''' Open "path" for writing, creating any parent directories as needed.
+    '''
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    return open(path, 'w+b')
+
+def handler(func, path, exc_info):
+    print("Inside handler")
+    print(exc_info)

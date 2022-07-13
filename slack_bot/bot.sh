@@ -1,22 +1,33 @@
 #!/bin/bash
 
-if [ "$(ls -A ~/Downloads/uag-self-help/log-archive)" ]; then 
+# $1 -> SLACK_TOKEN
+# $2 -> current_user
+# $3 -> SLACK_CHANNEL
+# $4 -> BOT_BASE_DIR
+# $5 -> UAG_BASE_DIR
+if [ "$(ls -A $5/log-archive)" ]; then 
 #    rm -rf /root/uag-self-help/log-archive/*
-    rm -rf ~/Downloads/uag-self-help/log-archive/*
+    rm -rf $5/log-archive/*
 fi 
 
-cat $PWD/slack_bot/inputs.dat > ~/Downloads/uag-self-help/inputs.dat
-rm ./slack_bot/inputs.dat
-for z in $PWD/slack_bot/*.zip;do
-    cp $z ~/Downloads/uag-self-help/log-archive
+cat $4/$2/inputs.dat > $5/inputs.dat
+# rm ./slack_bot/inputs.dat
+for z in $4/$2/*.zip;do
+    cp $z $5/log-archive
     # cp $z /root/uag-self-help/log-archive 
-    rm -rf "$z"
+    # rm -rf "$z"
 done 
 
-cmd=$(cd ~/Downloads/uag-self-help && bash Analyze.sh)
 
-compress=$(cd ~/Downloads/uag-self-help && zip -rq /home/shubham/Desktop/projects/server/slack_server/slack_bot/analysis-logs.zip analysis-logs)
+cmd=$(cd $5 && bash Analyze.sh)
 
-curl -s -F file=@"/home/shubham/Desktop/projects/server/slack_server/slack_bot/analysis-logs.zip" -F "initial_comment=Result of the analysis" -F channels="C03L2T10R43" -H "Authorization: Bearer $1" https://slack.com/api/files.upload -o /dev/null
+compress=$(cd $5 && zip -rq $4/$2/analysis-logs.zip analysis-logs)
 
-rm -rf ./slack_bot/analysis-logs.zip
+# file_url=$(curl -s -F file=@"/home/shubham/Desktop/projects/server/slack_server/slack_bot/$2/analysis-logs.zip" -F "initial_comment=Result of the analysis" -F channels="$3" -H "Authorization: Bearer $1" https://slack.com/api/files.upload \
+#             | python -c "import sys, json; print(json.load(sys.stdin)['file']['url_private_download'])")
+
+
+# echo $file_url
+
+
+# rm -rf ./slack_bot/$2

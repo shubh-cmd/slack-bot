@@ -20,9 +20,13 @@ environ.Env.read_env()
 from slack_sdk import *
 
 SLACK_TOKEN = env('SLACK_TOKEN')
+SLACK_CHANNEL = env('SLACK_CHANNEL')
 CLIENT = WebClient(token=SLACK_TOKEN)
 BOT_ID = CLIENT.api_call("auth.test")['user_id']
 WEBHOOK_URL = env('WEBHOOK_URL')
+BOT_BASE_DIR = ''
+UAG_BASE_DIR = ''
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,7 +43,12 @@ DEBUG = True if env('ENVIRONMENT') == 'DEV' else False
 
 ALLOWED_HOSTS = ['daphne.herokuapp.com', '20.219.109.231']
 
-
+if DEBUG:
+    BOT_BASE_DIR = '/home/shubham/Desktop/projects/server/slack_server/slack_bot'
+    UAG_BASE_DIR = '/home/shubham/Downloads/uag-self-help'
+else:
+    BOT_BASE_DIR = '/home/selfhelp/projects/uag-bot/slack_bot'
+    UAG_BASE_DIR = '/home/selfhelp/projects/uag-self-help'
 # Application definition
 
 INSTALLED_APPS = [
