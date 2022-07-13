@@ -1,26 +1,33 @@
 #!/bin/bash
-export TERM=xterm
-if [ "$(ls -A /home/selfhelp/projects/uag-self-help/log-archive)" ]; then 
+
+# $1 -> SLACK_TOKEN
+# $2 -> current_user
+# $3 -> SLACK_CHANNEL
+# $4 -> BOT_BASE_DIR
+# $5 -> UAG_BASE_DIR
+if [ "$(ls -A $5/log-archive)" ]; then 
 #    rm -rf /root/uag-self-help/log-archive/*
-    rm -rf /home/selfhelp/projects/uag-self-help/log-archive/*
+    rm -rf $5/log-archive/*
 fi 
 
-
-echo $(ls /home/selfhelp/projects/uag-bot/slack_bot)
-cat /home/selfhelp/projects/uag-bot/slack_bot/inputs.dat > /home/selfhelp/projects/uag-self-help/inputs.dat
-rm -f /home/selfhelp/projects/uag-bot/slack_bot/inputs.dat
-for z in /home/selfhelp/projects/uag-bot/slack_bot/*.zip;do
-    cp $z /home/selfhelp/projects/uag-self-help/log-archive
+cat $4/$2/inputs.dat > $5/inputs.dat
+# rm ./slack_bot/inputs.dat
+for z in $4/$2/*.zip;do
+    cp $z $5/log-archive
     # cp $z /root/uag-self-help/log-archive 
-    rm -rf "$z"
+    # rm -rf "$z"
 done 
 
-cmd=$(cd /home/selfhelp/projects/uag-self-help && bash Analyze.sh)
-#echo $(ls /home/selfhelp/projects/uag-self-help/analysis-logs)
-compress=$(cd /home/selfhelp/projects/uag-self-help && zip -rq /home/selfhelp/projects/uag-bot/slack_bot/analysis-logs.zip analysis-logs)
 
-curl -s -F file=@"/home/selfhelp/projects/uag-bot/slack_bot/analysis-logs.zip" -F "initial_comment=Result of the analysis" -F channels="C03L2T10R43" -H "Authorization: Bearer $1" https://slack.com/api/files.upload -o /dev/null
+cmd=$(cd $5 && bash Analyze.sh)
 
-rm -rf /home/selfhelp/projects/uag-bot/slack_bot/analysis-logs.zip
+compress=$(cd $5 && zip -rq $4/$2/analysis-logs.zip analysis-logs)
 
-echo $(ls /home/selfhelp/projects/uag-bot/slack_bot)
+# file_url=$(curl -s -F file=@"/home/shubham/Desktop/projects/server/slack_server/slack_bot/$2/analysis-logs.zip" -F "initial_comment=Result of the analysis" -F channels="$3" -H "Authorization: Bearer $1" https://slack.com/api/files.upload \
+#             | python -c "import sys, json; print(json.load(sys.stdin)['file']['url_private_download'])")
+
+
+# echo $file_url
+
+
+# rm -rf ./slack_bot/$2
