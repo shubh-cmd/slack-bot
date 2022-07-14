@@ -36,6 +36,10 @@ class SlackView(APIView):
                     CLIENT.chat_postEphemeral(
                         channel=e['channel_id'], user=e['user_id'], text="React any file you shared, by marking completed tick to start analysis")
             elif e['type'] == 'reaction_added' and e['user'] != BOT_ID:
+                valid, message = validate_folder(e['user'])
+                if not valid:
+                    CLIENT.chat_postEphemeral(channel=SLACK_CHANNEL,user=e['user'],text=message)
+                    return Response(200)
                 global jobs
                 jobs.put(e['user'])
                 global IS_FREE
@@ -64,3 +68,24 @@ def safe_open(path):
 def handler(func, path, exc_info):
     print("Inside handler")
     print(exc_info)
+
+def validate_folder(user):
+    if os.path.isdir(f'{BOT_BASE_DIR}/{user}'):
+        files = os.listdir(f'{BOT_BASE_DIR}/{user}')
+        is_exist_log_bundles = False
+        is_exist_inputs_dat = False
+        for file in files:
+            if file.endswith('.zip'):
+                is_exist_log_bundles = True
+            elif file.endswith('.dat'):
+                is_exist_inputs_dat = True
+
+        if not is_exist_log_bundles:
+            return (False,'Log bundles are not provided!')
+        elif not is_exist_inputs_dat:
+            return (False,'inputs.dat file is not provided!')
+
+        return (True,'')
+    else:
+        message = "Can't find the log bundles and inputs.dat, have you provided?"
+        return (False,message)
