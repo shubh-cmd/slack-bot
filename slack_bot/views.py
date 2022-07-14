@@ -34,8 +34,9 @@ class SlackView(APIView):
                     with safe_open(f'{BOT_BASE_DIR}/'+e['user_id']+'/'+file_name) as f:
                         f.write(bytearray(file_data))
                     CLIENT.chat_postEphemeral(
-                        channel=e['channel_id'], user=e['user_id'], text="React any file you shared, by marking completed tick to start analysis")
+                        channel=e['channel_id'], user=e['user_id'], text="React any file you shared to start analysis")
             elif e['type'] == 'reaction_added' and e['user'] != BOT_ID:
+                CLIENT.chat_postEphemeral(channel=SLACK_CHANNEL,user=e['user'],text="Started the analysis, will be back in a minute!")
                 global jobs
                 jobs.put(e['user'])
                 global IS_FREE
@@ -46,7 +47,7 @@ class SlackView(APIView):
                 
                     result = CLIENT.files_upload(file=f'{BOT_BASE_DIR}/{current_user}/analysis-logs.zip',initial_comment="Result of the Analysis",channels=SLACK_CHANNEL)
                     file_download_url = result['file']['url_private_download']
-                    CLIENT.chat_postEphemeral(channel=SLACK_CHANNEL,user=current_user,text=f'Find analysis report at {file_download_url}')
+                    CLIENT.chat_postEphemeral(channel=SLACK_CHANNEL,user=current_user,text=f'Here is your analysis report: {file_download_url}')
                     shutil.rmtree(f'{BOT_BASE_DIR}/{current_user}',onerror=handler)
                     IS_FREE = True
 
